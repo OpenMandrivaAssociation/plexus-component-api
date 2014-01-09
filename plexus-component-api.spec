@@ -3,7 +3,7 @@
 
 Name:           plexus-component-api
 Version:        1.0
-Release:        0.15.alpha15.0%{?dist}
+Release:        0.15.alpha15.1%{?dist}
 Summary:        Plexus Component API
 
 License:        ASL 2.0
