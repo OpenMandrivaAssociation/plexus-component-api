@@ -1,4 +1,4 @@
-%_javapackages_macros
+%{?_javapackages_macros:%_javapackages_macros}
 %define project_version 1.0-alpha-15
 
 Name:           plexus-component-api
