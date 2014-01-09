@@ -1,51 +1,33 @@
+%_javapackages_macros
 %define project_version 1.0-alpha-15
 
 Name:           plexus-component-api
 Version:        1.0
-Release:        0.6.alpha15
+Release:        0.15.alpha15.0%{?dist}
 Summary:        Plexus Component API
 
-Group:          Development/Java
 License:        ASL 2.0
 URL:            http://svn.codehaus.org/plexus/plexus-containers/tags/plexus-containers-1.0-alpha-15/plexus-component-api/
 #svn export http://svn.codehaus.org/plexus/plexus-containers/tags/plexus-containers-1.0-alpha-15/plexus-component-api/ plexus-component-api-1.0-alpha-15
 #tar zcf plexus-component-api-1.0-alpha-15.tar.gz plexus-component-api-1.0-alpha-15/
-Source0:        plexus-component-api-1.0-alpha-15.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source0:        %{name}-%{project_version}.tar.gz
 
 BuildArch: noarch
 
-BuildRequires:  java-devel >= 0:1.6.0
-BuildRequires:  jpackage-utils >= 0:1.7.2
-BuildRequires:  ant, ant-nodeps
-BuildRequires:  maven2 >= 0:2.0.4-9
-BuildRequires:  maven2-plugin-assembly
-BuildRequires:  maven2-plugin-compiler
-BuildRequires:  maven2-plugin-install
-BuildRequires:  maven2-plugin-jar
-BuildRequires:  maven2-plugin-resources
-BuildRequires:  maven2-plugin-site
-BuildRequires:  maven2-plugin-plugin
-BuildRequires:  maven-surefire-maven-plugin
-BuildRequires:  maven-surefire-provider-junit
-BuildRequires:  maven2-plugin-javadoc
-BuildRequires:  maven-doxia
-BuildRequires:  maven-doxia-sitetools
-BuildRequires:  plexus-digest
+BuildRequires:  java-devel >= 1:1.6.0
+BuildRequires:  maven-local
+BuildRequires:  maven-assembly-plugin
+BuildRequires:  maven-resources-plugin
+BuildRequires:  maven-site-plugin
+BuildRequires:  maven-plugin-plugin
 BuildRequires:  plexus-classworlds
-
-Requires:          java-devel >= 0:1.6.0
-Requires:          plexus-digest
-Requires:          plexus-classworlds
-Requires:          jpackage-utils
-Requires(post):    jpackage-utils >= 0:1.7.2
-Requires(postun):  jpackage-utils >= 0:1.7.2
+# requires as parent pom
+BuildRequires:  plexus-containers
 
 %description
 Plexus Component API
 
 %package javadoc
-Group:          Development/Java
 Summary:        Javadoc for %{name}
 
 %description javadoc
@@ -56,54 +38,69 @@ API documentation for %{name}.
 %setup -q -n %{name}-%{project_version}
 
 %build
-export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
-mvn-jpp \
-        -e \
-        -Dmaven2.jpp.mode=true \
-        -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
-        install javadoc:javadoc
+%mvn_build
 
 %install
+%mvn_install
+%if 0%{?fedora}
+%else
+# rpm5 parser...
+sed -i 's|1.0-alpha-15|1.0.alpha.15|g;' %{buildroot}%{_mavendepmapfragdir}/*
+%endif
 
-rm -rf %{buildroot}
+%pre javadoc
+# workaround for rpm bug, can be removed in F-20
+[ $1 -gt 1 ] && [ -L %{_javadocdir}/%{name} ] && \
+rm -rf $(readlink -f %{_javadocdir}/%{name}) %{_javadocdir}/%{name} || :
 
-# jars
-install -d -m 0755 %{buildroot}%{_javadir}/plexus
-install -m 644 target/%{name}-%{project_version}.jar %{buildroot}%{_javadir}/plexus
+%files -f .mfiles
+%files javadoc -f .mfiles-javadoc
 
-(cd %{buildroot}%{_javadir}/plexus && for jar in *-%{project_version}*; \
-    do ln -sf ${jar} `echo $jar| sed "s|-%{project_version}||g"`; done)
+%changelog
+* Mon Aug 12 2013 gil cattaneo <puntogil@libero.it> 1.0-0.15.alpha15
+- fix rhbz#992803
+- add missing BR plexus-containers
 
-%add_to_maven_depmap org.codehaus.plexus %{name} %{project_version} JPP/plexus %{name}
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0-0.14.alpha15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
-# poms
-install -d -m 755 %{buildroot}%{_mavenpomdir}
-install -pm 644 pom.xml \
-    %{buildroot}%{_mavenpomdir}/JPP.plexus-%{name}.pom
+* Wed Mar 20 2013 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.0-0.13.alpha15
+- Update to latest guidelines
 
-# javadoc
-install -d -m 0755 %{buildroot}%{_javadocdir}/plexus/%{name}-%{version}
-cp -pr target/site/api*/* %{buildroot}%{_javadocdir}/plexus/%{name}-%{version}/
-ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/plexus/%{name}
-rm -rf target/site/api*
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0-0.12.alpha15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
-%post
-%update_maven_depmap
+* Wed Feb 06 2013 Java SIG <java-devel@lists.fedoraproject.org> - 1.0-0.11.alpha15
+- Update for https://fedoraproject.org/wiki/Fedora_19_Maven_Rebuild
+- Replace maven BuildRequires with maven-local
 
-%postun
-%update_maven_depmap
+* Tue Aug  7 2012 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.0-0.10.alpha15
+- Move jar to original name format to improve compatibility
 
-%clean
-rm -rf %{buildroot}
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0-0.9.alpha15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
-%files
-%defattr(-,root,root,-)
-%{_javadir}/plexus/*
-%{_mavenpomdir}/*
-%{_mavendepmapfragdir}/*
+* Mon May 21 2012 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.0-0.8.alpha15
+- Cleanup spec
+- Use maven-3.x to build
 
-%files javadoc
-%defattr(-,root,root,-)
-%{_javadocdir}/plexus/%{name}-%{version}
-%{_javadocdir}/plexus/%{name}
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0-0.7.alpha15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0-0.6.alpha15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Wed May 26 2010 Yong Yang <yyang@redhat.com> - 0:1.0-0.5.alpha15
+- Add R: plexus-digest
+
+* Thu May 20 2010 Yong Yang <yyang@redhat.com> - 0:1.0-0.4.alpha15
+- Fix JPP pom name
+
+* Thu May 20 2010 Yong Yang <yyang@redhat.com> - 0:1.0-0.3.alpha15
+- Add BR:  plexus-digest
+
+* Thu May 20 2010 Yong Yang <yyang@redhat.com> - 0:1.0-0.2.alpha15
+- Change JPP pom name to prefix JPP-
+
+* Tue May 04 2010 Yong Yang <yyang@redhat.com> - 0:1.0-0.1.alpha15
+- Initial build
