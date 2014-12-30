@@ -3,9 +3,9 @@
 
 Name:           plexus-component-api
 Version:        1.0
-Release:        0.15.alpha15.1%{?dist}
+Release:        0.18.alpha15.1
 Summary:        Plexus Component API
-
+Group:          Development/Java
 License:        ASL 2.0
 URL:            http://svn.codehaus.org/plexus/plexus-containers/tags/plexus-containers-1.0-alpha-15/plexus-component-api/
 #svn export http://svn.codehaus.org/plexus/plexus-containers/tags/plexus-containers-1.0-alpha-15/plexus-component-api/ plexus-component-api-1.0-alpha-15
@@ -45,7 +45,7 @@ API documentation for %{name}.
 %if 0%{?fedora}
 %else
 # rpm5 parser...
-sed -i 's|1.0-alpha-15|1.0.alpha.15|g;' %{buildroot}%{_mavendepmapfragdir}/*
+sed -i 's|1.0-alpha-15|1.0.alpha.15|g;' %{buildroot}%{_datadir}/maven-metadata/*
 %endif
 
 %pre javadoc
