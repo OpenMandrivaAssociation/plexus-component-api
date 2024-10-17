@@ -7,7 +7,7 @@ Release:        0.18.alpha15.1
 Summary:        Plexus Component API
 Group:          Development/Java
 License:        ASL 2.0
-URL:            http://svn.codehaus.org/plexus/plexus-containers/tags/plexus-containers-1.0-alpha-15/plexus-component-api/
+URL:            https://svn.codehaus.org/plexus/plexus-containers/tags/plexus-containers-1.0-alpha-15/plexus-component-api/
 #svn export http://svn.codehaus.org/plexus/plexus-containers/tags/plexus-containers-1.0-alpha-15/plexus-component-api/ plexus-component-api-1.0-alpha-15
 #tar zcf plexus-component-api-1.0-alpha-15.tar.gz plexus-component-api-1.0-alpha-15/
 Source0:        %{name}-%{project_version}.tar.gz
